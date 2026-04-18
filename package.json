@@ -1,0 +1,31 @@
+{
+  "name": "universidad-del-sur",
+  "version": "1.0.0",
+  "description": "Servidor HTTPS básico con Node.js y Express para actividad práctica de SSL",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fcarrasco1992/CIB302-Semana-5.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/fcarrasco1992/CIB302-Semana-5/issues"
+  },
+  "homepage": "https://github.com/fcarrasco1992/CIB302-Semana-5#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
