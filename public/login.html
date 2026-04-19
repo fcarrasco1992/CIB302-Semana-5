@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Universidad del Sur - Login</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #49040d, #49040d);
+      display: flex; justify-content: center; align-items: center;
+      height: 100vh; margin: 0;
+    }
+    .card {
+      background: white; padding: 2rem 2.5rem; border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 320px;
+    }
+    .card img {
+      width: 100%; height: auto; border-radius: 8px; margin-bottom: 1.5rem;
+      display: block;
+    }
+    h1 { color: #49040d; text-align: center; margin-bottom: 1.5rem; }
+    input {
+      width: 100%; padding: 10px; margin: 8px 0;
+      border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+    }
+    button {
+      width: 100%; padding: 12px; background: #49050d; color: white;
+      border: none; border-radius: 6px; font-size: 1rem;
+      cursor: pointer; margin-top: 10px;
+    }
+    button:hover { background: #49040d; }
+    .mensaje { margin-top: 10px; text-align: center; font-size: 0.9rem; }
+    .error { color: #c0392b; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="/img/login_estudiantres.png" alt="Universidad del Sur">
+    <h1>Universidad del Sur</h1>
+    <form id="loginForm">
+      <input type="text" id="usuario" placeholder="Usuario" required>
+      <input type="password" id="password" placeholder="Contrasena" required>
+      <button type="submit">Ingresar</button>
+    </form>
+    <div id="mensaje" class="mensaje"></div>
+  </div>
+ 
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const usuario = document.getElementById('usuario').value;
+      const password = document.getElementById('password').value;
+      const mensaje = document.getElementById('mensaje');
+ 
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario, password })
+        });
+ 
+        const data = await res.json();
+        if (res.ok) {
+          mensaje.textContent = 'Ingresando a tu portal...';
+          mensaje.className = 'mensaje';
+          setTimeout(() => window.location.href = '/mi-portal', 800);
+        } else {
+          mensaje.textContent = data.error;
+          mensaje.className = 'mensaje error';
+        }
+      } catch (err) {
+        mensaje.textContent = 'Error de conexion';
+        mensaje.className = 'mensaje error';
+      }
+    });
+  </script>
+</body>
+</html>
