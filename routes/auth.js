@@ -51,3 +51,16 @@ router.post('/login',(req,res) => {
         usuario: user.usuario
     });
 });
+
+// --------------- POST /Auth/logout -----------
+router.post('/logout', (req,res) => {
+// Borra la cookie del navegador
+res.clearCookie('token', {
+httpOnly: true,
+secure: true,
+sameSite: 'strict'
+});
+res.json({ mensaje: 'Sesion cerrada correctamente'});
+});
+
+module.exports = router;
