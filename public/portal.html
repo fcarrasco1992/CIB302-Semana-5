@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mi Portal - Universidad del Sur</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #49040d, #49040d);
+      min-height: 100vh;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    header h1 {
+      color: #49040d;
+      margin: 0;
+      font-size: 1.3rem;
+    }
+    button#btnLogout {
+      background: #49040d;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    button#btnLogout:hover { background: #6b0616; }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      margin-bottom: 1.5rem;
+    }
+    .card h2 {
+      color: #49040d;
+      margin-top: 0;
+      border-bottom: 2px solid #49040d;
+      padding-bottom: 0.5rem;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .info-item label {
+      display: block;
+      font-size: 0.78rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+    .info-item span {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #222;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    thead tr {
+      background: #49040d;
+      color: white;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 14px;
+    }
+    tbody tr:nth-child(even) { background: #fdf2f3; }
+    tbody tr:hover { background: #fce4e6; }
+    .nota {
+      font-weight: 700;
+      color: #49040d;
+    }
+    .promedio {
+      text-align: right;
+      margin-top: 0.8rem;
+      font-size: 1rem;
+      color: #555;
+    }
+    .promedio span { font-weight: 700; color: #49040d; }
+    #error {
+      background: #fce4e6;
+      color: #c0392b;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Universidad del Sur &mdash; Portal Estudiantil</h1>
+      <button id="btnLogout">Cerrar sesión</button>
+    </header>
+
+    <div id="error"></div>
+
+    <div class="card" id="cardInfo" style="display:none">
+      <h2>Información del Estudiante</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Nombre completo</label>
+          <span id="nombre"></span>
+        </div>
+        <div class="info-item">
+          <label>Usuario</label>
+          <span id="usuario"></span>
+        </div>
+        <div class="info-item">
+          <label>Carrera</label>
+          <span id="carrera"></span>
+        </div>
+        <div class="info-item">
+          <label>Semestre</label>
+          <span id="semestre"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="cardNotas" style="display:none">
+      <h2>Calificaciones</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Ramo</th>
+            <th>Nota</th>
+          </tr>
+        </thead>
+        <tbody id="tablaNotas"></tbody>
+      </table>
+      <p class="promedio">Promedio: <span id="promedio"></span></p>
+    </div>
+  </div>
+
+  <script>
+    async function cargarPortal() {
+      try {
+        const res = await fetch('/mi-portal/datos');
+        if (res.status === 401) {
+          window.location.href = '/login.html';
+          return;
+        }
+        const data = await res.json();
+        if (!res.ok) {
+          mostrarError(data.error || 'Error al cargar datos');
+          return;
+        }
+
+        const e = data.estudiante;
+        document.getElementById('nombre').textContent = e.nombre;
+        document.getElementById('usuario').textContent = e.usuario;
+        document.getElementById('carrera').textContent = e.carrera;
+        document.getElementById('semestre').textContent = e.semestre + '° Semestre';
+
+        const tbody = document.getElementById('tablaNotas');
+        e.notas.forEach(n => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${n.ramo}</td><td class="nota">${n.nota.toFixed(1)}</td>`;
+          tbody.appendChild(tr);
+        });
+
+        const prom = e.notas.reduce((s, n) => s + n.nota, 0) / e.notas.length;
+        document.getElementById('promedio').textContent = prom.toFixed(1);
+
+        document.getElementById('cardInfo').style.display = 'block';
+        document.getElementById('cardNotas').style.display = 'block';
+      } catch (err) {
+        mostrarError('Error de conexión');
+      }
+    }
+
+    function mostrarError(msg) {
+      const el = document.getElementById('error');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+      await fetch('/auth/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    });
+
+    cargarPortal();
+  </script>
+</body>
+</html>
